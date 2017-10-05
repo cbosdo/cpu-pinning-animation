@@ -1,0 +1,22 @@
+#!/bin/sh
+
+# Generate images
+blender cpu-pinning.blend -P generate-keyframes.py -b
+
+pushd output
+# Resize the images
+mkdir -p small
+for f in $(ls -1 *.png); do
+  convert $f -resize 600x600 small/$f
+done
+
+mkdir -p final
+mv small/00.png final/0_start.png
+cp small/01.png final/1_io.png
+
+# Build video out of the pictures
+ffmpeg -y -framerate 2 -i small/%02d.png -pix_fmt yuv420p final/2_others.mov
+
+# Cleanup
+rm -rf small
+popd
